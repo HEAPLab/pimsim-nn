@@ -3,7 +3,11 @@
 //
 #include "Chip.h"
 #include <sstream>
+#include <fstream>
 #include <fmt/core.h>
+#include <ghc/filesystem.hpp>
+
+namespace fs = ghc::filesystem;
 
 Chip::Chip(const ChipConfig &chip_config_,const SimConfig& sim_config_)
 : global_memory("global_memory", chip_config_.global_memory_config, chip_config_.global_memory_switch_id),
@@ -136,6 +140,37 @@ void Chip::initializeCores(const nlohmann::json &json_inst) {
 
 }
 
+void Chip::initializeCoresFromDirectory(const nlohmann::json& json_config, const std::string& instruction_dir) {
+    auto core_cnt = json_config.at("core_cnt").get<int>();
+    auto array_group_map = json_config.at("array_group_map");
+
+    for (int i = 0; i < core_cnt; i++) {
+        auto core_name = std::string("core") + std::to_string(i);
+        auto binary_path = fs::path(instruction_dir) / ("core_" + std::to_string(i) + ".pim");
+        auto json_path = fs::path(instruction_dir) / ("core_" + std::to_string(i) + ".json");
+
+        if (!fs::exists(binary_path) && !fs::exists(json_path))
+            continue;
+
+        std::vector<int> core_array_group_map;
+        if (array_group_map.contains(core_name))
+            core_array_group_map = array_group_map.at(core_name).get<std::vector<int>>();
+
+        auto core_ptr = std::make_shared<Core>(
+                core_name.c_str(),chip_config.core_config,sim_config,i ,core_array_group_map,this,&clk);
+        core_ptr->switchBind(&network);
+
+        if (fs::exists(binary_path))
+            core_ptr->readInstFromBinary(binary_path.string());
+        else {
+            std::ifstream json_file(json_path.string());
+            nlohmann::json core_json = nlohmann::json::parse(json_file);
+            core_ptr->readInstFromJson(core_json);
+        }
+        core_array.push_back(core_ptr);
+    }
+}
+
 std::map<std::string, double> Chip::getChipWeightedTime() {
     std::map<std::string,double> chip_weighted_time;
     for (const auto& core : core_array){
@@ -195,4 +230,3 @@ std::string Chip::getCoreWeightedTimeReport(){
 
     return s.str();
 }
-

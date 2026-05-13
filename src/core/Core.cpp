@@ -107,6 +107,11 @@ void Core::readInstFromJson(const nlohmann::json &json_inst) {
     max_pc = inst_fetch.inst_buffer_size-1;
 }
 
+void Core::readInstFromBinary(const std::string& binary_path) {
+    inst_fetch.readInstFromBinary(binary_path);
+    max_pc = inst_fetch.inst_buffer_size-1;
+}
+
 void Core::switchBind(Network *network) {
     core_switch.bind(network);
 }
@@ -248,6 +253,3 @@ void Core::start_of_simulation() {
 std::string Core::getStatus() {
     return std::string();
 }
-
-
-

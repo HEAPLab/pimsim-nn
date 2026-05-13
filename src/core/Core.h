@@ -29,6 +29,7 @@ public:
     // two methods to initialize inst buffer, use the second one currently
     void setInstBuffer(const std::vector<Instruction>& inst_buffer);
     void readInstFromJson(const nlohmann::json& json_inst);
+    void readInstFromBinary(const std::string& binary_path);
     void switchBind(Network* network);
 
 
@@ -133,6 +134,5 @@ private:
     ClockDomain* clk_ptr;
 
 };
-
 
 #endif //CORE_CORE_H_

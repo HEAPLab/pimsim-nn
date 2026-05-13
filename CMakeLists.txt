@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.1)
 project(pimsim-nn LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 11 CACHE STRING "Use C++ 11")
 set(CMAKE_VERBOSE_MAKEFILE ON)
+enable_testing()
 
 # dependency
 add_subdirectory(packages/fmt)
@@ -92,6 +93,17 @@ target_sources(ChipTest PRIVATE
     src/ChipTest.cpp
 )
 
+add_executable(InstructionBinaryTest
+    src/isa/InstructionBinaryTest.cpp
+)
+target_include_directories(InstructionBinaryTest PRIVATE
+    src
+)
+target_link_libraries(InstructionBinaryTest PRIVATE
+    pimsim-nn
+)
+add_test(NAME InstructionBinaryTest COMMAND InstructionBinaryTest)
+
 # compress
 add_executable(zc "")
 target_include_directories(zc PRIVATE packages/header-only/zstr/src)
@@ -99,4 +111,3 @@ target_include_directories(zc PRIVATE packages/header-only/zstr/src)
 target_link_libraries(zc PRIVATE zlibstatic)
 
 target_sources(zc PRIVATE tools/zc.cpp)
-
