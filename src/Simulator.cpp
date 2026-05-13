@@ -31,8 +31,8 @@ void Simulator::runSimulation() {
     std::ifstream config_file(config_file_path);
 
 
-    fs::path file_path(config_file_path);
-    auto parent_path = file_path.parent_path();
+    fs::path config_path(config_file_path);
+    auto config_parent_path = config_path.parent_path();
 
 
     std::cout<<"Loading Inst and Config --- "<<std::endl;
@@ -45,7 +45,6 @@ void Simulator::runSimulation() {
         auto artifact_config_path = fs::path(inst_file_path) / "config.json";
         std::ifstream artifact_config_file(artifact_config_path.string());
         artifact_config = nlohmann::json::parse(artifact_config_file);
-        parent_path = fs::path(inst_file_path);
     } else {
         zstr::ifstream inst_file(inst_file_path,std::ios::binary); // compressed
         json_inst = nlohmann::json::parse(inst_file);
@@ -62,7 +61,7 @@ void Simulator::runSimulation() {
         chip_ptr->initializeCoresFromDirectory(artifact_config, inst_file_path);
     else
         chip_ptr->initializeCores(json_inst);
-    chip_ptr->network.readLatencyEnergyFile(parent_path.string());
+    chip_ptr->network.readLatencyEnergyFile(config_parent_path.string());
     std::cout<<"Read finish"<<std::endl;
 
     int levels = is_run_in_gui?100:10;
