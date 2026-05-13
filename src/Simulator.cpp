@@ -64,17 +64,20 @@ void Simulator::runSimulation() {
     chip_ptr->network.readLatencyEnergyFile(config_parent_path.string());
     std::cout<<"Read finish"<<std::endl;
 
-    int levels = is_run_in_gui?100:10;
-    ProgressBar bar(SC_MS,levels,global_config.sim_config.sim_time,[this](int progress){
-        if (is_run_in_gui)
-            std::cout<<fmt::format("<{}>",progress)<<std::endl;
-        else
-            std::cout<<fmt::format("Progress --- <{}0%>",progress)<<std::endl;
-    });
-
-
     std::cout<<"Start Simulation --- "<<std::endl;
-    sc_start(global_config.sim_config.sim_time,sc_core::SC_MS);
+    if (global_config.sim_config.sim_mode == 0) {
+        int levels = is_run_in_gui?100:10;
+        ProgressBar bar(SC_MS,levels,global_config.sim_config.sim_time,[this](int progress){
+            if (is_run_in_gui)
+                std::cout<<fmt::format("<{}>",progress)<<std::endl;
+            else
+                std::cout<<fmt::format("Progress --- <{}0%>",progress)<<std::endl;
+        });
+        sc_start(global_config.sim_config.sim_time,sc_core::SC_MS);
+    } else {
+        while (!chip_ptr->isFinish())
+            sc_start(global_config.sim_config.sim_time, sc_core::SC_MS);
+    }
     std::cout<<"Simulation Finish"<<std::endl;
 
     auto end = std::chrono::high_resolution_clock::now();
