@@ -1,9 +1,9 @@
 #include "isa/Instruction.h"
 
-#include <cassert>
 #include <sstream>
+#include <systemc>
 
-int main() {
+int sc_main(int, char*[]) {
     const auto json = nlohmann::json::parse(R"json(
 [
   {"imm":64,"op":"sldi","rd":0},
@@ -23,6 +23,5 @@ int main() {
 
     const std::vector<Instruction> binary_instructions = readSingleCoreInstFromBinary(binary_stream);
 
-    assert(json_instructions == binary_instructions);
-    return 0;
+    return json_instructions == binary_instructions ? 0 : 1;
 }
