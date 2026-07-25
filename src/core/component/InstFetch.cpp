@@ -36,6 +36,8 @@ void InstFetch::me_processFetchUpdate() {
             // no more new inst
             if_id_port.write({DecodeInfo(), false});
             std::cout<<"core :"<<core_ptr->getCoreID()<< " reached time:"<<sc_time_stamp()<<std::endl;
+            if (inst_buffer_size == 0)
+                core_ptr->setFinish();
             return;
         }
 

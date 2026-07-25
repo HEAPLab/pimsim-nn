@@ -77,7 +77,7 @@ double EnergyCounter::getStaticEnergyPJ() const {
 
 double EnergyCounter::getAveragePowerMW() const {
     if (is_set_running_time)
-        return getTotalEnergyPJ()/running_time;
+        return running_time == 0 ? static_power : getTotalEnergyPJ()/running_time;
     return -1;
 }
 
@@ -116,6 +116,5 @@ std::ostream &operator<<(std::ostream &out, const EnergyCounter &counter) {
     out << "dynamic energy: "<<counter.dynamic_energy<<"static energy: "<<counter.getStaticEnergyPJ()<<" time: "<<counter.running_time<<" static power: "<<counter.static_power;
     return out;
 }
-
 
 
