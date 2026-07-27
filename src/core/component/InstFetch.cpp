@@ -95,6 +95,10 @@ bool InstFetch::isFinish() {
     return false;
 }
 
+int InstFetch::getCurrentPC() const {
+    return pc_out.read();
+}
+
 void InstFetch::readInstFromJson(const nlohmann::json &json_inst) {
     inst_buffer.clear();
     for (auto& cur_inst:json_inst)

@@ -38,6 +38,7 @@ public:
     std::string getStatus();
 
     bool isFinish();
+    int getCurrentPC() const;
 
     // store all instructions
     std::vector<Instruction> inst_buffer;

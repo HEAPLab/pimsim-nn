@@ -11,9 +11,16 @@
 #include "config/Config.hpp"
 #include "chip/Chip.h"
 
+enum class InstructionInputMode {
+    Auto,
+    SingleFile,
+    PerCoreDirectory
+};
+
 class Simulator {
 public:
     Simulator(std::string config_file_path_, std::string inst_file_path_);
+    Simulator(std::string config_file_path_, std::string inst_file_path_, InstructionInputMode input_mode_);
 
     void runSimulation();
 
@@ -29,7 +36,8 @@ private:
     std::string config_file_path;
     std::string inst_file_path;
     bool is_run_in_gui = false;
-private:
+    InstructionInputMode input_mode;
+
     std::shared_ptr<Chip> chip_ptr;
 };
 
