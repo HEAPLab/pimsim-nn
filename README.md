@@ -110,8 +110,9 @@ There are some parameters in architecture configuration file to change simulatio
 
 | Parameter            | Description                                                  |
 | -------------------- | ------------------------------------------------------------ |
-| sim_time             | `sim_time` represents simulation time in unit `ms`           |
-| sim_mode             | When set to `0`, simulator assumes enough input samples and reports throughout rate. When set to `1`,  simulator will only process one input sample and gives its latency. |
+| sim_time             | `sim_time` represents simulation time in unit `ms` and is used in throughput mode (`sim_mode = 0`) |
+| sim_mode             | When set to `0`, simulator assumes enough input samples and reports throughput. When set to `1`, it processes one input sample and stops when all loaded cores finish. |
+| latency_timeout_ms   | Maximum simulated latency-mode wait before reporting unfinished core state. Defaults to 60000 ms. |
 | report_verbose_level | When set to `0`, simulator will only give chip level performance and power consumption statistics. When set to `1`, simulator will also give core level statistics. |
 
 ## Citing pimsim-nn

@@ -34,15 +34,6 @@ nlohmann::json parseJsonFile(const std::string& path, const std::string& descrip
     }
 }
 
-const char* inputModeName(InstructionInputMode mode) {
-    switch (mode) {
-        case InstructionInputMode::Auto: return "auto";
-        case InstructionInputMode::SingleFile: return "single-file";
-        case InstructionInputMode::PerCoreDirectory: return "per-core-directory";
-    }
-    return "unknown";
-}
-
 InstructionInputMode resolveInputMode(const std::string& path, InstructionInputMode selected_mode) {
     const bool is_file = fs::is_regular_file(path);
     const bool is_directory = fs::is_directory(path);
@@ -129,8 +120,19 @@ void Simulator::runSimulation() {
             reportProgress(level * 100 / levels);
         }
     } else {
-        while (!chip_ptr->isFinish())
-            sc_start(global_config.sim_config.sim_time, sc_core::SC_MS);
+        const double poll_ns = std::max(global_config.chip_config.core_config.period, 1.0) * 65536.0;
+        const double deadline_ns = sc_time_stamp().to_seconds() * 1e9
+                + global_config.sim_config.latency_timeout_ms * 1e6;
+        while (!chip_ptr->isFinish() && !sc_end_of_simulation_invoked()) {
+            const double remaining_ns = deadline_ns - sc_time_stamp().to_seconds() * 1e9;
+            if (remaining_ns <= 0)
+                break;
+            sc_start(std::min(poll_ns, remaining_ns), sc_core::SC_NS);
+        }
+        if (!chip_ptr->isFinish())
+            throw std::runtime_error("Latency simulation did not complete within "
+                    + std::to_string(global_config.sim_config.latency_timeout_ms)
+                    + " ms; unfinished cores: " + unfinishedCoreReport(*chip_ptr));
     }
     std::cout<<"Simulation Finish"<<std::endl;
 

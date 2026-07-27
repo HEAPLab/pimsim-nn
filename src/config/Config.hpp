@@ -282,17 +282,19 @@ struct ChipConfig{
 
 struct SimConfig{
     int sim_mode=0; // 0 for run until specific time
-                    // 1 for run just one round (all instructions)
-    double sim_time = 1; //micro seconds
+                    // 1 for run until one sample finishes
+    double sim_time = 1; // milliseconds, used only in throughput mode
+    double latency_timeout_ms = 60000;
     int report_verbose_level=0;
 
     void checkValid(){
-        auto ans = check_positive(sim_time) && check_not_negative(report_verbose_level) && (sim_mode == 1 || sim_mode == 0);
+        auto ans = check_positive(sim_time, latency_timeout_ms) && check_not_negative(report_verbose_level)
+                && (sim_mode == 1 || sim_mode == 0);
         if (!ans) throw "SimConfig not valid ";
     }
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(SimConfig,
-                                                sim_mode, sim_time, report_verbose_level);
+                                                sim_mode, sim_time, latency_timeout_ms, report_verbose_level);
 };
 
 
