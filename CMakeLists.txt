@@ -94,7 +94,7 @@ target_sources(ChipTest PRIVATE
 )
 
 add_executable(InstructionBinaryTest
-    src/isa/InstructionBinaryTest.cpp
+    test/InstructionBinaryTest.cpp
 )
 target_include_directories(InstructionBinaryTest PRIVATE
     src
@@ -105,7 +105,7 @@ target_link_libraries(InstructionBinaryTest PRIVATE
 add_test(NAME InstructionBinaryTest COMMAND InstructionBinaryTest)
 
 add_executable(InstructionDirectoryTest
-    src/isa/InstructionDirectoryTest.cpp
+    test/InstructionDirectoryTest.cpp
 )
 target_include_directories(InstructionDirectoryTest PRIVATE
     src
