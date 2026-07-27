@@ -104,6 +104,59 @@ target_link_libraries(InstructionBinaryTest PRIVATE
 )
 add_test(NAME InstructionBinaryTest COMMAND InstructionBinaryTest)
 
+add_executable(InstructionDirectoryTest
+    src/isa/InstructionDirectoryTest.cpp
+)
+target_include_directories(InstructionDirectoryTest PRIVATE
+    src
+)
+target_link_libraries(InstructionDirectoryTest PRIVATE
+    pimsim-nn
+)
+add_test(NAME InstructionDirectoryTest COMMAND InstructionDirectoryTest)
+
+set(TEST_FIXTURES "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures")
+add_test(NAME AutomaticSingleFile
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME ExplicitSingleFile
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=single)
+add_test(NAME AutomaticDirectory
+    COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME ExplicitPerCoreDirectory
+    COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=directory)
+add_test(NAME ThroughputProgress
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json")
+set_tests_properties(ThroughputProgress PROPERTIES PASS_REGULAR_EXPRESSION "Progress --- <100%>")
+add_test(NAME ThroughputGuiProgress
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json" --gui)
+set_tests_properties(ThroughputGuiProgress PROPERTIES PASS_REGULAR_EXPRESSION "<100>")
+
+add_test(NAME DirectoryModeRejectsFile
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=directory)
+add_test(NAME SingleModeRejectsDirectory
+    COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=single)
+add_test(NAME MalformedArrayGroupMap
+    COMMAND ChipTest "${TEST_FIXTURES}/malformed_map" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME MissingArrayGroupMap
+    COMMAND ChipTest "${TEST_FIXTURES}/missing_map" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME MalformedPerCoreFilename
+    COMMAND ChipTest "${TEST_FIXTURES}/malformed_filename" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME DuplicatePerCoreFile
+    COMMAND ChipTest "${TEST_FIXTURES}/duplicate" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME MissingPerCoreFile
+    COMMAND ChipTest "${TEST_FIXTURES}/missing" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME LatencyTimeoutDiagnostics
+    COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
+set_tests_properties(
+    DirectoryModeRejectsFile SingleModeRejectsDirectory MalformedArrayGroupMap
+    MissingArrayGroupMap MalformedPerCoreFilename DuplicatePerCoreFile
+    MissingPerCoreFile LatencyTimeoutDiagnostics
+    PROPERTIES WILL_FAIL TRUE)
+
 # compress
 add_executable(zc "")
 target_include_directories(zc PRIVATE packages/header-only/zstr/src)
