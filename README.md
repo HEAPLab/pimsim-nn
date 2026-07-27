@@ -94,6 +94,18 @@ Finally, only two inputs are required: one is the path of program instruction fi
 ChipTest  path_to_program_instructions_file  path_to_archtecture_configuration_file 
 ```
 
+The instruction path may be a combined JSON/JSON.gz file or a directory containing
+`config.json` plus deterministic `core_<id>.json` or `core_<id>.pim` files.
+File-versus-directory mode is detected automatically. It can also be selected
+explicitly without changing the existing positional arguments:
+
+``` shell
+ChipTest instructions.json config.json --instruction-mode=single
+ChipTest instruction_directory config.json --instruction-mode=directory
+```
+
+Use `--gui` or `--gui=true` for GUI progress output and `--gui=false` to disable it.
+
 There are some parameters in architecture configuration file to change simulation behavior.
 
 | Parameter            | Description                                                  |
