@@ -11,7 +11,7 @@ enable_testing()
 add_subdirectory(packages/fmt)
 add_subdirectory(packages/systemc)
 add_subdirectory(packages/json)
-add_subdirectory(packages/zlib)
+add_subdirectory(packages/zlib EXCLUDE_FROM_ALL)
 add_subdirectory(packages/filesystem)
 
 
