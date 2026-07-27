@@ -1,0 +1,18 @@
+{
+  "chip_config": {
+    "core_config": {
+      "matrix_config": {
+        "xbar_array_count": 4
+      }
+    },
+    "network_config": {
+      "layout": [1, 1],
+      "net_config_file_path": "network.json"
+    },
+    "core_cnt": 1
+  },
+  "sim_config": {
+    "sim_mode": 0,
+    "sim_time": 0.001
+  }
+}

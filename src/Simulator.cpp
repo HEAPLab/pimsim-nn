@@ -4,11 +4,11 @@
 
 #include "Simulator.h"
 #include "chip/Chip.h"
-#include "utils/Timer.h"
 
-#include <utility>
-#include <nlohmann/json.hpp>
+#include <algorithm>
+#include <chrono>
 #include <fstream>
+#include <ghc/filesystem.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
@@ -16,8 +16,6 @@
 #include <utility>
 #include <fmt/core.h>
 #include <zstr.hpp>
-#include <ghc/filesystem.hpp>
-#include <chrono>
 
 
 //namespace fs = std::filesystem;
@@ -124,14 +122,12 @@ void Simulator::runSimulation() {
 
     std::cout<<"Start Simulation --- "<<std::endl;
     if (global_config.sim_config.sim_mode == 0) {
-        int levels = is_run_in_gui?100:10;
-        ProgressBar bar(SC_MS,levels,global_config.sim_config.sim_time,[this](int progress){
-            if (is_run_in_gui)
-                std::cout<<fmt::format("<{}>",progress)<<std::endl;
-            else
-                std::cout<<fmt::format("Progress --- <{}0%>",progress)<<std::endl;
-        });
-        sc_start(global_config.sim_config.sim_time,sc_core::SC_MS);
+        const int levels = is_run_in_gui ? 100 : 10;
+        const double chunk_ms = global_config.sim_config.sim_time / levels;
+        for (int level = 1; level <= levels && !sc_end_of_simulation_invoked(); ++level) {
+            sc_start(chunk_ms, sc_core::SC_MS);
+            reportProgress(level * 100 / levels);
+        }
     } else {
         while (!chip_ptr->isFinish())
             sc_start(global_config.sim_config.sim_time, sc_core::SC_MS);
@@ -166,7 +162,15 @@ std::string Simulator::getSimulationReport() {
 }
 
 void Simulator::progressBar() {
-    int progress = (sc_time_stamp().to_seconds() / (global_config.sim_config.sim_time/1000)) * 100;
+    const double total_seconds = global_config.sim_config.sim_time / 1000.0;
+    const double progress = total_seconds > 0
+            ? sc_time_stamp().to_seconds() / total_seconds * 100
+            : 0;
+    reportProgress(static_cast<int>(std::max(0.0, std::min(progress, 100.0))));
+}
+
+void Simulator::reportProgress(int progress) {
+    progress = std::max(0, std::min(progress, 100));
     if (is_run_in_gui)
         std::cout<<fmt::format("<{}>",progress)<<std::endl;
     else

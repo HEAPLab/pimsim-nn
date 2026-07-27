@@ -159,11 +159,14 @@ std::string Chip::getSimulationReport() {
 
     if (sim_config.sim_mode == 0){
         // throughput mode
-        s<<fmt::format("  - {:<20}{:.3} samples\n","output count:",getRunRounds());
-        s<<fmt::format("  - {:<20}{:.3} samples/s\n","throughput:",(getRunRounds()/(sim_config.sim_time/1e3)));
-        s<<fmt::format("  - {:<20}{:.10} ms\n","average latency:",(sim_config.sim_time/getRunRounds()));
+        const double run_rounds = getRunRounds();
+        s<<fmt::format("  - {:<20}{:.3} samples\n","output count:",run_rounds);
+        s<<fmt::format("  - {:<20}{:.3} samples/s\n","throughput:",(run_rounds/(sim_config.sim_time/1e3)));
+        s<<fmt::format("  - {:<20}{:.10} ms\n","average latency:",
+                      run_rounds == 0 ? 0 : sim_config.sim_time/run_rounds);
         s<<fmt::format("  - {:<20}{:.10} mW\n","average power:",(energy_counter.getAveragePowerMW()));
-        s<<fmt::format("  - {:<20}{:.10} pJ/it\n","average energy:",(energy_counter.getTotalEnergyPJ()/getRunRounds()));
+        s<<fmt::format("  - {:<20}{:.10} pJ/it\n","average energy:",
+                      run_rounds == 0 ? 0 : energy_counter.getTotalEnergyPJ()/run_rounds);
     }
     else if (sim_config.sim_mode == 1){
         // latency mode
