@@ -259,9 +259,9 @@ void Chip::initializeCoresFromDirectory(const nlohmann::json& json_config, const
         if (core_id < 0 || core_id >= core_count)
             throw std::runtime_error("Instruction file '" + path.string() + "' assigns core "
                     + std::to_string(core_id) + ", but config core_cnt is " + std::to_string(core_count));
-        if (!files_by_core.emplace(core_id, path).second)
-            throw std::runtime_error("Duplicate instruction files assign core " + std::to_string(core_id)
-                    + " in " + instruction_dir);
+        const auto selected = files_by_core.emplace(core_id, path);
+        if (!selected.second && path.extension() == ".pim")
+            selected.first->second = path;
     }
 
     if (files_by_core.empty())
