@@ -30,5 +30,12 @@ int sc_main(int, char*[]) {
         malformed_rejected = true;
     }
 
-    return json_instructions == binary_instructions && malformed_rejected ? 0 : 1;
+    bool unsupported_rejected = false;
+    try {
+        Instruction(nlohmann::json::parse(R"json({"op":"vsoftmax"})json"));
+    } catch (const std::runtime_error& error) {
+        unsupported_rejected = std::string(error.what()) == "pimsim-nn does not support opcode vsoftmax";
+    }
+
+    return json_instructions == binary_instructions && malformed_rejected && unsupported_rejected ? 0 : 1;
 }

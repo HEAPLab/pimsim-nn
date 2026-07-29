@@ -11,6 +11,7 @@
 #include <memory>
 #include <map>
 #include <fstream>
+#include <stdexcept>
 #include <vector>
 #include <cstdint>
 #include "nlohmann/json.hpp"
@@ -159,6 +160,8 @@ struct Instruction {
 
     inline void readInst (const nlohmann::json & inst){
         auto j_op = inst.at("op").get<std::string>();
+        if (j_op == "vsoftmax")
+            throw std::runtime_error("pimsim-nn does not support opcode vsoftmax");
         op = Opcode::_from_string(j_op.c_str());
 
         auto type = getInstType();

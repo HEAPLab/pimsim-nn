@@ -89,7 +89,7 @@ Opcode decodeBinaryOpcode(uint32_t opcode) {
         case 31: return Opcode::wait;
         case 32: return Opcode::sync;
         case 21:
-            throw std::runtime_error("pimsim-nn does not support binary opcode vsoftmax");
+            throw std::runtime_error("pimsim-nn does not support opcode vsoftmax");
         default:
             throw std::runtime_error("Unsupported PIM binary opcode");
     }
