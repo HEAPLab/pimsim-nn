@@ -187,15 +187,15 @@ std::string Chip::getSimulationReport() {
 }
 
 double Chip::getRunRounds() {
-    double cnt=0;
-    int cores = 0;
+    int completed_rounds = std::numeric_limits<int>::max();
+    bool has_active_core = false;
     for (const auto& core_ptr:core_array){
-        cnt += core_ptr->getRunRounds();
-        cores ++ ;
+        if (core_ptr->getMaxPC() < 0)
+            continue;
+        completed_rounds = std::min(completed_rounds, core_ptr->getRunRounds());
+        has_active_core = true;
     }
-    // average rounds
-//    return cnt/chip_config.core_cnt;
-    return cnt/cores;
+    return has_active_core ? completed_rounds : 0;
 }
 
 void Chip::initializeCores(const nlohmann::json &json_inst) {

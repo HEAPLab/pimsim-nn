@@ -129,6 +129,9 @@ add_test(NAME ExplicitPerCoreDirectory
 add_test(NAME ThroughputProgress
     COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json")
 set_tests_properties(ThroughputProgress PROPERTIES PASS_REGULAR_EXPRESSION "Progress --- <100%>")
+add_test(NAME ThroughputCompletedRounds
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json")
+set_tests_properties(ThroughputCompletedRounds PROPERTIES PASS_REGULAR_EXPRESSION "output count:       1 samples")
 add_test(NAME ThroughputGuiProgress
     COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json" --gui)
 set_tests_properties(ThroughputGuiProgress PROPERTIES PASS_REGULAR_EXPRESSION "<100>")
@@ -149,6 +152,8 @@ add_test(NAME MissingPerCoreFile
     COMMAND ChipTest "${TEST_FIXTURES}/missing" "${TEST_FIXTURES}/latency_config.json")
 add_test(NAME LatencyTimeoutDiagnostics
     COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME SyncTokens
+    COMMAND ChipTest "${TEST_FIXTURES}/sync_tokens.json" "${TEST_FIXTURES}/sync_tokens_config.json")
 set_tests_properties(
     DirectoryModeRejectsFile SingleModeRejectsDirectory MalformedArrayGroupMap
     MissingArrayGroupMap MalformedPerCoreFilename MissingPerCoreFile

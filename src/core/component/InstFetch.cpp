@@ -31,6 +31,10 @@ void InstFetch::me_processFetchUpdate() {
     auto cur_pc = pc_out.read();
 
     if (cur_pc == inst_buffer_size){
+        // Unused cores have no instruction stream in throughput mode.
+        if (sim_config.sim_mode == 0 && inst_buffer_size == 0)
+            return;
+
         // finish running
         if (sim_config.sim_mode == 1) {
             // no more new inst
@@ -41,8 +45,8 @@ void InstFetch::me_processFetchUpdate() {
             return;
         }
 
-        // can not reach
-        throw "Inst Fetch Error: Sim mode 1 Can not reach";
+        // A non-empty stream must loop in throughput mode.
+        throw "Inst Fetch Error: throughput stream reached its end";
     }
 
 //    std::cout<<getStatus()<<std::endl;
