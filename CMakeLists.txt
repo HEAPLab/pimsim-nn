@@ -129,6 +129,8 @@ add_test(NAME ExplicitPerCoreDirectory
 add_test(NAME ThroughputProgress
     COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json")
 set_tests_properties(ThroughputProgress PROPERTIES PASS_REGULAR_EXPRESSION "Progress --- <100%>")
+add_test(NAME ThroughputEmptyCore
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/throughput_config.json")
 add_test(NAME ThroughputGuiProgress
     COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json" --gui)
 set_tests_properties(ThroughputGuiProgress PROPERTIES PASS_REGULAR_EXPRESSION "<100>")

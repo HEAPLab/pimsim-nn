@@ -30,19 +30,26 @@ pc_reg("pc_reg",clk){
 void InstFetch::me_processFetchUpdate() {
     auto cur_pc = pc_out.read();
 
+    if (inst_buffer_size == 0) {
+        if_id_port.write({DecodeInfo(), false});
+        if (sim_config.sim_mode == 1) {
+            std::cout<<"core :"<<core_ptr->getCoreID()<< " reached time:"<<sc_time_stamp()<<std::endl;
+            core_ptr->setFinish();
+        }
+        return;
+    }
+
     if (cur_pc == inst_buffer_size){
         // finish running
         if (sim_config.sim_mode == 1) {
             // no more new inst
             if_id_port.write({DecodeInfo(), false});
             std::cout<<"core :"<<core_ptr->getCoreID()<< " reached time:"<<sc_time_stamp()<<std::endl;
-            if (inst_buffer_size == 0)
-                core_ptr->setFinish();
             return;
         }
 
         // can not reach
-        throw "Inst Fetch Error: Sim mode 1 Can not reach";
+        throw "Inst Fetch Error: throughput instruction stream ended unexpectedly";
     }
 
 //    std::cout<<getStatus()<<std::endl;
