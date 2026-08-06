@@ -1,1 +1,1 @@
-{"config":{"core_cnt":1,"array_group_map":{"core0":[1]}},"core0":[{"imm":1,"op":"sldi","rd":0}]}
+{"config":{"core_cnt":2,"array_group_map":{"core0":[1],"core1":[1]}},"core0":[{"imm":1,"op":"sldi","rd":0}],"core1":[{"imm":1,"op":"sldi","rd":0},{"imm":2,"op":"sldi","rd":0}]}

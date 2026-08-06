@@ -48,8 +48,8 @@ void InstFetch::me_processFetchUpdate() {
             return;
         }
 
-        // can not reach
-        throw "Inst Fetch Error: throughput instruction stream ended unexpectedly";
+        // A non-empty stream must loop in throughput mode.
+        throw "Inst Fetch Error: throughput stream reached its end";
     }
 
 //    std::cout<<getStatus()<<std::endl;

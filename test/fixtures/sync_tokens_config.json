@@ -1,9 +1,7 @@
 {
   "chip_config": {
     "core_config": {
-      "matrix_config": {
-        "xbar_array_count": 4
-      }
+      "matrix_config": {"xbar_array_count": 4}
     },
     "network_config": {
       "layout": [1, 2],
@@ -12,7 +10,8 @@
     "core_cnt": 2
   },
   "sim_config": {
-    "sim_mode": 0,
-    "sim_time": 0.001
+    "sim_mode": 1,
+    "sim_time": 1,
+    "latency_timeout_ms": 1
   }
 }
