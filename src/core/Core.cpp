@@ -180,6 +180,7 @@ int Core::getRunRounds() const {
 
 void Core::addRunRounds() {
     run_rounds ++ ;
+    chip_ptr->updateFastThroughput();
 }
 
 std::string Core::getSimulationReport() {

@@ -106,6 +106,17 @@ ChipTest instruction_directory config.json --instruction-mode=directory
 
 Use `--gui` or `--gui=true` for GUI progress output and `--gui=false` to disable it.
 
+Use `--fast` for a fast steady-state throughput approximation during Raptor
+development. It only affects throughput mode. The simulator compares two
+consecutive, non-overlapping two-round windows and stops when their throughput
+differs by at most 1%. A failed comparison discards the older window and tests
+the next one. `sim_time` remains the convergence deadline; if convergence is
+not reached, the simulator logs the failure and reports the unchanged legacy
+full-duration result. This fixed heuristic is intended for development and
+optimization, not as a general convergence guarantee or a replacement for
+authoritative full-duration experiments.
+Programs with no active PIM cores complete immediately and have zero as throughput result.
+
 There are some parameters in architecture configuration file to change simulation behavior.
 
 | Parameter            | Description                                                  |
