@@ -24,6 +24,8 @@ public:
     void readInstFromJson(const nlohmann::json& json_inst);
 
     void initializeCores(const nlohmann::json& json_inst);
+    void initializeCoresFromDirectory(const nlohmann::json& json_config, const std::string& instruction_dir);
+    void initializeCoresWithDir(const std::string& instruction_dir);
 
     bool isFinish();
 

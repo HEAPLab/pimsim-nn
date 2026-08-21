@@ -20,17 +20,18 @@
 namespace fs = ghc::filesystem;
 
 Simulator::Simulator(std::string config_file_path_, std::string inst_file_path_):
-        config_file_path(std::move(config_file_path_)), inst_file_path(std::move(inst_file_path_)){
+        Simulator(std::move(config_file_path_), std::move(inst_file_path_), InstructionInputMode::Auto) {}
 
-}
+Simulator::Simulator(std::string config_file_path_, std::string inst_file_path_,
+                     InstructionInputMode input_mode_):
+        config_file_path(std::move(config_file_path_)), inst_file_path(std::move(inst_file_path_)),
+        input_mode(input_mode_) {}
 
 void Simulator::runSimulation() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-
     std::ifstream config_file(config_file_path);
-    zstr::ifstream inst_file(inst_file_path,std::ios::binary); // compressed
 
 
     fs::path config_path(config_file_path);
@@ -38,9 +39,20 @@ void Simulator::runSimulation() {
 
 
     std::cout<<"Loading Inst and Config --- "<<std::endl;
-
-    nlohmann::json json_inst = nlohmann::json::parse(inst_file);
     nlohmann::json json_config = nlohmann::json::parse(config_file);
+    nlohmann::json json_inst;
+    nlohmann::json artifact_config;
+    bool use_artifact_directory = input_mode == InstructionInputMode::PerCoreDirectory
+            || (input_mode == InstructionInputMode::Auto && fs::is_directory(inst_file_path));
+
+    if (use_artifact_directory) {
+        auto artifact_config_path = fs::path(inst_file_path) / "config.json";
+        std::ifstream artifact_config_file(artifact_config_path.string());
+        artifact_config = nlohmann::json::parse(artifact_config_file);
+    } else {
+        zstr::ifstream inst_file(inst_file_path,std::ios::binary); // compressed
+        json_inst = nlohmann::json::parse(inst_file);
+    }
 
     std::cout<<"Load finish"<<std::endl;
 
@@ -49,7 +61,10 @@ void Simulator::runSimulation() {
     chip_ptr = std::make_shared<Chip>(global_config.chip_config,global_config.sim_config);
 
     std::cout<<"Reading Instructions From File --- "<<std::endl;
-    chip_ptr->initializeCores(json_inst);
+    if (use_artifact_directory)
+        chip_ptr->initializeCoresFromDirectory(artifact_config, inst_file_path);
+    else
+        chip_ptr->initializeCores(json_inst);
     chip_ptr->network.readLatencyEnergyFile(config_parent_path.string());
     std::cout<<"Read finish"<<std::endl;
 
@@ -118,4 +133,3 @@ std::string Simulator::getBasicInformation() {
 
     return s.str();
 }
-
