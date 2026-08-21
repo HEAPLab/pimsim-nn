@@ -115,6 +115,11 @@ target_link_libraries(InstructionDirectoryTest PRIVATE
 )
 add_test(NAME InstructionDirectoryTest COMMAND InstructionDirectoryTest)
 
+set(TEST_FIXTURES "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures")
+add_test(NAME LatencyTimeoutDiagnostics
+    COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
+set_tests_properties(LatencyTimeoutDiagnostics PROPERTIES WILL_FAIL TRUE)
+
 # compress
 add_executable(zc "")
 target_include_directories(zc PRIVATE packages/header-only/zstr/src)
