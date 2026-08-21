@@ -144,6 +144,16 @@ set_tests_properties(ThroughputCompletedRounds PROPERTIES PASS_REGULAR_EXPRESSIO
 add_test(NAME ThroughputGuiProgress
     COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json" --gui)
 set_tests_properties(ThroughputGuiProgress PROPERTIES PASS_REGULAR_EXPRESSION "<100>")
+add_test(NAME FastThroughputConverges
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput_fast.json" "${TEST_FIXTURES}/throughput_config.json" --fast)
+set_tests_properties(FastThroughputConverges PROPERTIES PASS_REGULAR_EXPRESSION
+    "Fast throughput converged(.|\n)*output count:       6 samples(.|\n)*throughput:         5e\\+08 samples/s")
+add_test(NAME FastThroughputFallback
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json" --fast)
+set_tests_properties(FastThroughputFallback PROPERTIES PASS_REGULAR_EXPRESSION "using legacy full-duration throughput result")
+add_test(NAME LatencyIgnoresFast
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json" --fast)
+set_tests_properties(LatencyIgnoresFast PROPERTIES PASS_REGULAR_EXPRESSION "latency:")
 
 add_test(NAME DirectoryModeRejectsFile
     COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json"

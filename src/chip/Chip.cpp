@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 #include <ghc/filesystem.hpp>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <map>
 #include <regex>
@@ -15,6 +16,9 @@
 namespace fs = ghc::filesystem;
 
 namespace {
+
+const int FAST_WINDOW_ROUNDS = 2;
+const double FAST_RELATIVE_TOLERANCE = 0.01;
 
 nlohmann::json parseJsonFile(const fs::path& path, const std::string& description) {
     std::ifstream input(path.string());
@@ -160,12 +164,18 @@ std::string Chip::getSimulationReport() {
     if (sim_config.sim_mode == 0){
         // throughput mode
         const double run_rounds = getRunRounds();
+        const bool use_fast_result = fast_window_boundaries.size() == 3;
+        const double measurement_rounds = use_fast_result
+                ? 2 * FAST_WINDOW_ROUNDS : run_rounds;
+        const double measurement_ms = use_fast_result
+                ? (fast_window_boundaries.back() - fast_window_boundaries.front()).to_seconds() * 1e3
+                : sim_config.sim_time;
         s<<fmt::format("  - {:<20}{:.3} samples\n","output count:",run_rounds);
-        s<<fmt::format("  - {:<20}{:.3} samples/s\n","throughput:",(run_rounds/(sim_config.sim_time/1e3)));
+        s<<fmt::format("  - {:<20}{:.3} samples/s\n","throughput:",(measurement_rounds/(measurement_ms/1e3)));
         if (run_rounds == 0)
             s<<fmt::format("  - {:<20}{}\n","average latency:","NA");
         else
-            s<<fmt::format("  - {:<20}{:.10} ms\n","average latency:",sim_config.sim_time/run_rounds);
+            s<<fmt::format("  - {:<20}{:.10} ms\n","average latency:",measurement_ms/measurement_rounds);
         s<<fmt::format("  - {:<20}{:.10} mW\n","average power:",(energy_counter.getAveragePowerMW()));
         if (run_rounds == 0)
             s<<fmt::format("  - {:<20}{}\n","average energy:","NA");
@@ -200,6 +210,49 @@ double Chip::getRunRounds() {
         has_active_core = true;
     }
     return has_active_core ? completed_rounds : 0;
+}
+
+void Chip::enableFastThroughput() {
+    fast_throughput = true;
+    fast_window_boundaries.push_back(sc_time_stamp());
+    std::cout << "Fast throughput mode active: W=2 rounds, relative tolerance=1%, "
+              << "sim_time is the convergence deadline" << std::endl;
+    if (std::none_of(core_array.begin(), core_array.end(),
+                     [](const std::shared_ptr<Core>& core) { return core->getMaxPC() >= 0; })) {
+        fast_throughput_converged = true;
+        std::cout << "Fast throughput complete: no active cores; throughput is zero" << std::endl;
+    }
+}
+
+void Chip::updateFastThroughput() {
+    if (!fast_throughput || fast_throughput_converged
+            || getRunRounds() < fast_next_boundary_round)
+        return;
+
+    fast_window_boundaries.push_back(sc_time_stamp());
+    fast_next_boundary_round += FAST_WINDOW_ROUNDS;
+    if (fast_window_boundaries.size() < 3)
+        return;
+
+    const double first_seconds =
+            (fast_window_boundaries[1] - fast_window_boundaries[0]).to_seconds();
+    const double second_seconds =
+            (fast_window_boundaries[2] - fast_window_boundaries[1]).to_seconds();
+    const double first_throughput = FAST_WINDOW_ROUNDS / first_seconds;
+    const double second_throughput = FAST_WINDOW_ROUNDS / second_seconds;
+    const double relative_difference = std::abs(second_throughput - first_throughput)
+            / std::max(first_throughput, second_throughput);
+    if (relative_difference <= FAST_RELATIVE_TOLERANCE) {
+        fast_throughput_converged = true;
+        std::cout << "Fast throughput converged; stopping early" << std::endl;
+        sc_stop();
+    } else {
+        fast_window_boundaries.erase(fast_window_boundaries.begin());
+    }
+}
+
+bool Chip::isFastThroughputConverged() const {
+    return fast_throughput_converged;
 }
 
 void Chip::initializeCores(const nlohmann::json &json_inst) {

@@ -11,7 +11,7 @@ namespace {
 
 void printUsage(const char* program) {
     std::cout << "Usage: " << program << " <instruction_path> <config_file>\n"
-              << "       [--instruction-mode=auto|single|directory] [--gui[=true|false]]\n";
+              << "       [--instruction-mode=auto|single|directory] [--gui[=true|false]] [--fast]\n";
 }
 
 InstructionInputMode parseInstructionMode(const std::string& value) {
@@ -48,10 +48,13 @@ int sc_main(int argc,char* argv[]){
     try {
         InstructionInputMode input_mode = InstructionInputMode::Auto;
         bool gui = false;
+        bool fast = false;
         for (int index = 3; index < argc; ++index) {
             const std::string argument(argv[index]);
             if (argument == "--gui") {
                 gui = true;
+            } else if (argument == "--fast") {
+                fast = true;
             } else if (argument.compare(0, 6, "--gui=") == 0) {
                 gui = parseBool(argument.substr(6), "--gui");
             } else if (argument.compare(0, 19, "--instruction-mode=") == 0) {
@@ -63,6 +66,7 @@ int sc_main(int argc,char* argv[]){
 
         Simulator simulator(argv[2], argv[1], input_mode);
         simulator.setRunInGUI(gui);
+        simulator.setFast(fast);
         simulator.runSimulation();
         return 0;
     } catch (const std::exception& error) {

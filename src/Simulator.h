@@ -30,6 +30,7 @@ public:
     std::string getSimulationReport();
 
     void setRunInGUI(bool mode);
+    void setFast(bool mode);
 
 private:
     void reportProgress(int progress);
@@ -38,6 +39,7 @@ private:
     std::string config_file_path;
     std::string inst_file_path;
     bool is_run_in_gui = false;
+    bool fast = false;
     InstructionInputMode input_mode;
 
     std::shared_ptr<Chip> chip_ptr;
