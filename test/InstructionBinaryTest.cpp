@@ -11,7 +11,9 @@ int sc_main(int, char*[]) {
   {"len":16,"offset":{"offset_select":0,"offset_value":0},"op":"lmv","rd":0,"rs1":1},
   {"group":3,"mbiw":8,"op":"mvmul","rd":0,"relu":0,"rs1":1},
   {"len":16,"offset":{"offset_select":0,"offset_value":0},"op":"vvadd","rd":0,"rs1":1,"rs2":2},
-  {"core":2,"offset":{"offset_select":0,"offset_value":0},"op":"send","rd":0,"size":16}
+  {"core":2,"offset":{"offset_select":0,"offset_value":0},"op":"send","rd":0,"size":16},
+  {"event_register":3,"op":"wait","wait_value":2},
+  {"core":1,"event_register":3,"op":"sync"}
 ]
 )json");
 
