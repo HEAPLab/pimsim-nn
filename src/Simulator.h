@@ -32,6 +32,8 @@ public:
     void setRunInGUI(bool mode);
 
 private:
+    void reportProgress(int progress);
+
     GlobalConfig global_config;
     std::string config_file_path;
     std::string inst_file_path;
