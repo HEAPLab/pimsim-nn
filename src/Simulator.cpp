@@ -33,8 +33,8 @@ void Simulator::runSimulation() {
     zstr::ifstream inst_file(inst_file_path,std::ios::binary); // compressed
 
 
-    fs::path file_path(config_file_path);
-    auto parent_path = file_path.parent_path();
+    fs::path config_path(config_file_path);
+    auto config_parent_path = config_path.parent_path();
 
 
     std::cout<<"Loading Inst and Config --- "<<std::endl;
@@ -50,7 +50,7 @@ void Simulator::runSimulation() {
 
     std::cout<<"Reading Instructions From File --- "<<std::endl;
     chip_ptr->initializeCores(json_inst);
-    chip_ptr->network.readLatencyEnergyFile(parent_path.string());
+    chip_ptr->network.readLatencyEnergyFile(config_parent_path.string());
     std::cout<<"Read finish"<<std::endl;
 
     int levels = is_run_in_gui?100:10;
@@ -118,5 +118,4 @@ std::string Simulator::getBasicInformation() {
 
     return s.str();
 }
-
 
