@@ -61,6 +61,9 @@ public:
 
 
 private:
+    void initializeCore(int core_id, const std::vector<int>& array_group_map,
+                        const std::vector<Instruction>& instructions);
+
     EnergyCounter energy_counter;
 
 

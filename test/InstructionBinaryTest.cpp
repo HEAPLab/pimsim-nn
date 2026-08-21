@@ -22,6 +22,13 @@ int sc_main(int, char*[]) {
     binary_stream.seekg(0);
 
     const std::vector<Instruction> binary_instructions = readSingleCoreInstFromBinary(binary_stream);
+    bool malformed_rejected = false;
+    try {
+        std::stringstream malformed("not-a-pim-binary", std::ios::in | std::ios::binary);
+        readSingleCoreInstFromBinary(malformed);
+    } catch (const std::runtime_error&) {
+        malformed_rejected = true;
+    }
 
-    return json_instructions == binary_instructions ? 0 : 1;
+    return json_instructions == binary_instructions && malformed_rejected ? 0 : 1;
 }
