@@ -113,12 +113,18 @@ void Simulator::runSimulation() {
 
     std::cout<<"Start Simulation --- "<<std::endl;
     if (global_config.sim_config.sim_mode == 0) {
+        if (fast)
+            chip_ptr->enableFastThroughput();
         const int levels = is_run_in_gui ? 100 : 10;
         const double chunk_ms = global_config.sim_config.sim_time / levels;
-        for (int level = 1; level <= levels && !sc_end_of_simulation_invoked(); ++level) {
+        for (int level = 1; level <= levels && !sc_end_of_simulation_invoked()
+                && !chip_ptr->isFastThroughputConverged(); ++level) {
             sc_start(chunk_ms, sc_core::SC_MS);
             reportProgress(level * 100 / levels);
         }
+        if (fast && !chip_ptr->isFastThroughputConverged())
+            std::cout << "Fast throughput convergence failed before sim_time; "
+                      << "using legacy full-duration throughput result" << std::endl;
     } else {
         const double poll_ns = std::max(global_config.chip_config.core_config.period, 1.0) * 65536.0;
         const double deadline_ns = sc_time_stamp().to_seconds() * 1e9
@@ -157,7 +163,8 @@ std::string Simulator::getSimulationReport() {
     s<<fmt::format(sub_line, "simulation mode:",global_config.sim_config.sim_mode);
 
     if (global_config.sim_config.sim_mode == 0)
-        s<<fmt::format("  - {:<20}{} ms\n","simulation time:",global_config.sim_config.sim_time);
+        s<<fmt::format("  - {:<20}{} ms\n", "simulation time:",
+                      fast ? sc_time_stamp().to_seconds() * 1e3 : global_config.sim_config.sim_time);
 
 
     return s.str() + chip_ptr->getSimulationReport();
@@ -181,6 +188,10 @@ void Simulator::reportProgress(int progress) {
 
 void Simulator::setRunInGUI(bool mode) {
     is_run_in_gui = mode;
+}
+
+void Simulator::setFast(bool mode) {
+    fast = mode;
 }
 
 std::string Simulator::getBasicInformation() {

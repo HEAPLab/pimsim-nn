@@ -30,6 +30,9 @@ public:
     bool isFinish();
 
     double getRunRounds();
+    void enableFastThroughput();
+    void updateFastThroughput();
+    bool isFastThroughputConverged() const;
 
     void setEnergyCounter();
 
@@ -65,6 +68,11 @@ private:
                         const std::vector<Instruction>& instructions);
 
     EnergyCounter energy_counter;
+
+    bool fast_throughput = false;
+    bool fast_throughput_converged = false;
+    int fast_next_boundary_round = 2;
+    std::vector<sc_time> fast_window_boundaries;
 
 
 };
