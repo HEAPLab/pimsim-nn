@@ -10,6 +10,9 @@
 #include <sstream>
 #include <memory>
 #include <map>
+#include <fstream>
+#include <vector>
+#include <cstdint>
 #include "nlohmann/json.hpp"
 #include "isa/ISA.h"
 
@@ -43,6 +46,10 @@ struct OffsetField{
     }
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(OffsetField,offset_value,offset_select);
+
+    bool operator==(const OffsetField& other) const {
+        return offset_value == other.offset_value && offset_select == other.offset_select;
+    }
 };
 
 struct VectorField{
@@ -50,6 +57,10 @@ struct VectorField{
     OffsetField offset ;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(VectorField,len,offset);
+
+    bool operator==(const VectorField& other) const {
+        return len == other.len && offset == other.offset;
+    }
 };
 
 struct MatrixField{
@@ -62,6 +73,11 @@ struct MatrixField{
     int obiw = 0;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(MatrixField,mbiw,group,relu,ibiw,obiw)
+
+    bool operator==(const MatrixField& other) const {
+        return mbiw == other.mbiw && group == other.group && relu == other.relu
+            && ibiw == other.ibiw && obiw == other.obiw;
+    }
 };
 
 struct ScalarField{
@@ -69,6 +85,10 @@ struct ScalarField{
     int offset_value = 0; // byte
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(ScalarField,imm,offset_value);
+
+    bool operator==(const ScalarField& other) const {
+        return imm == other.imm && offset_value == other.offset_value;
+    }
 };
 
 struct TransferField{
@@ -83,7 +103,32 @@ struct TransferField{
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(TransferField,size,imm,len,core,offset,wait_value,event_register);
 
+    bool operator==(const TransferField& other) const {
+        return len == other.len && size == other.size && imm == other.imm && core == other.core
+            && offset == other.offset && wait_value == other.wait_value && event_register == other.event_register;
+    }
+
 };
+
+namespace binary_format {
+
+static const char kMagic[4] = {'P', 'I', 'M', 'B'};
+static const uint32_t kVersion = 1;
+static const size_t kHeaderSize = 12;
+static const size_t kRecordSize = 20;
+
+struct InstructionRecord {
+    uint8_t opcode = 0;
+    uint8_t rd = 0;
+    uint8_t r1 = 0;
+    int32_t r2_or_imm = 0;
+    int32_t generic1 = 0;
+    int32_t generic2 = 0;
+    int32_t generic3 = 0;
+    uint8_t flags = 0;
+};
+
+} // namespace binary_format
 
 struct Instruction {
     // Common field
@@ -154,6 +199,15 @@ struct Instruction {
 
     Instruction() = default;
 
+    bool operator==(const Instruction& other) const {
+        return op == other.op && rs1_addr == other.rs1_addr && rs2_addr == other.rs2_addr && rd_addr == other.rd_addr
+            && inst_type == other.inst_type
+            && ((!vector && !other.vector) || (vector && other.vector && *vector == *other.vector))
+            && ((!matrix && !other.matrix) || (matrix && other.matrix && *matrix == *other.matrix))
+            && ((!scalar && !other.scalar) || (scalar && other.scalar && *scalar == *other.scalar))
+            && ((!transfer && !other.transfer) || (transfer && other.transfer && *transfer == *other.transfer));
+    }
+
 
     friend std::ostream & operator<<(std::ostream & os, const Instruction& inst) {
         os<<"inst type:"<<inst.inst_type._to_string()<<" opcode:"<<inst.op._to_string();
@@ -179,9 +233,7 @@ inline std::vector<Instruction> readSingleCoreInstFromJson(const nlohmann::json&
     return tmp;
 }
 
-
-
-
-
+std::vector<Instruction> readSingleCoreInstFromBinary(std::istream& binary_stream);
+void writeSingleCoreInstToBinary(std::ostream& binary_stream, const std::vector<Instruction>& instructions);
 
 #endif //INST_INSTRUCTION_H_
