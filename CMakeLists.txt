@@ -116,11 +116,40 @@ target_link_libraries(InstructionDirectoryTest PRIVATE
 add_test(NAME InstructionDirectoryTest COMMAND InstructionDirectoryTest)
 
 set(TEST_FIXTURES "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures")
-add_test(NAME LatencyTimeoutDiagnostics
-    COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
-set_tests_properties(LatencyTimeoutDiagnostics PROPERTIES WILL_FAIL TRUE)
+add_test(NAME AutomaticSingleFile
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME ExplicitSingleFile
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=single)
+add_test(NAME AutomaticDirectory
+    COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME ExplicitPerCoreDirectory
+    COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=directory)
 add_test(NAME ThroughputEmptyCore
     COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/throughput_config.json")
+
+add_test(NAME DirectoryModeRejectsFile
+    COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=directory)
+add_test(NAME SingleModeRejectsDirectory
+    COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json"
+            --instruction-mode=single)
+add_test(NAME MalformedArrayGroupMap
+    COMMAND ChipTest "${TEST_FIXTURES}/malformed_map" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME MissingArrayGroupMap
+    COMMAND ChipTest "${TEST_FIXTURES}/missing_map" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME MalformedPerCoreFilename
+    COMMAND ChipTest "${TEST_FIXTURES}/malformed_filename" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME MissingPerCoreFile
+    COMMAND ChipTest "${TEST_FIXTURES}/missing" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME LatencyTimeoutDiagnostics
+    COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
+set_tests_properties(
+    DirectoryModeRejectsFile SingleModeRejectsDirectory MalformedArrayGroupMap
+    MissingArrayGroupMap MalformedPerCoreFilename MissingPerCoreFile
+    LatencyTimeoutDiagnostics
+    PROPERTIES WILL_FAIL TRUE)
 
 # compress
 add_executable(zc "")
