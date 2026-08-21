@@ -30,6 +30,7 @@ public:
 
     // use json as immediate inst format
     void readInstFromJson(const nlohmann::json & json_inst);
+    void readInstFromBinary(const std::string& binary_path);
 
     // Update PC and Fetch Inst
     void me_processFetchUpdate();

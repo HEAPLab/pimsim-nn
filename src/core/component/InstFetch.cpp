@@ -3,6 +3,7 @@
 //
 
 #include <sstream>
+#include <fstream>
 
 #include "InstFetch.h"
 #include "core/Core.h"
@@ -93,7 +94,16 @@ bool InstFetch::isFinish() {
 }
 
 void InstFetch::readInstFromJson(const nlohmann::json &json_inst) {
+    inst_buffer.clear();
     for (auto& cur_inst:json_inst)
         inst_buffer.emplace_back(cur_inst);
+    inst_buffer_size = (int)inst_buffer.size();
+}
+
+void InstFetch::readInstFromBinary(const std::string& binary_path) {
+    std::ifstream binary_stream(binary_path, std::ios::binary);
+    if (!binary_stream)
+        throw std::runtime_error("Failed to open binary instruction file: " + binary_path);
+    inst_buffer = readSingleCoreInstFromBinary(binary_stream);
     inst_buffer_size = (int)inst_buffer.size();
 }
