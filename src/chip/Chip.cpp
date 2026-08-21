@@ -160,12 +160,13 @@ void Chip::initializeCoresFromDirectory(const nlohmann::json& json_config, const
                 core_name.c_str(),chip_config.core_config,sim_config,i ,core_array_group_map,this,&clk);
         core_ptr->switchBind(&network);
 
-        if (fs::exists(json_path)) {
+        if (fs::exists(binary_path))
+            core_ptr->readInstFromBinary(binary_path.string());
+        else {
             std::ifstream json_file(json_path.string());
             nlohmann::json core_json = nlohmann::json::parse(json_file);
             core_ptr->readInstFromJson(core_json);
-        } else
-            core_ptr->readInstFromBinary(binary_path.string());
+        }
         core_array.push_back(core_ptr);
     }
 }

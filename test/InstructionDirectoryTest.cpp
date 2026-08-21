@@ -21,6 +21,9 @@ int sc_main(int, char*[]) {
 
         const auto json = nlohmann::json::parse(R"([{"imm":7,"op":"sldi","rd":0}])");
         const auto expected = readSingleCoreInstFromJson(json);
+        std::ofstream json_file((directory / "core_0.json").string());
+        json_file << R"([{"imm":3,"op":"sldi","rd":0}])";
+        json_file.close();
         std::ofstream binary((directory / "core_0.pim").string(), std::ios::binary);
         writeSingleCoreInstToBinary(binary, expected);
         binary.close();
