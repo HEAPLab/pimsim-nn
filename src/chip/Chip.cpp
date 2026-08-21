@@ -77,11 +77,18 @@ std::string Chip::getSimulationReport() {
 
     if (sim_config.sim_mode == 0){
         // throughput mode
-        s<<fmt::format("  - {:<20}{:.3} samples\n","output count:",getRunRounds());
-        s<<fmt::format("  - {:<20}{:.3} samples/s\n","throughput:",(getRunRounds()/(sim_config.sim_time/1e3)));
-        s<<fmt::format("  - {:<20}{:.10} ms\n","average latency:",(sim_config.sim_time/getRunRounds()));
+        const double run_rounds = getRunRounds();
+        s<<fmt::format("  - {:<20}{:.3} samples\n","output count:",run_rounds);
+        s<<fmt::format("  - {:<20}{:.3} samples/s\n","throughput:",(run_rounds/(sim_config.sim_time/1e3)));
+        if (run_rounds == 0)
+            s<<fmt::format("  - {:<20}{}\n","average latency:","NA");
+        else
+            s<<fmt::format("  - {:<20}{:.10} ms\n","average latency:",sim_config.sim_time/run_rounds);
         s<<fmt::format("  - {:<20}{:.10} mW\n","average power:",(energy_counter.getAveragePowerMW()));
-        s<<fmt::format("  - {:<20}{:.10} pJ/it\n","average energy:",(energy_counter.getTotalEnergyPJ()/getRunRounds()));
+        if (run_rounds == 0)
+            s<<fmt::format("  - {:<20}{}\n","average energy:","NA");
+        else
+            s<<fmt::format("  - {:<20}{:.10} pJ/it\n","average energy:",energy_counter.getTotalEnergyPJ()/run_rounds);
     }
     else if (sim_config.sim_mode == 1){
         // latency mode
@@ -103,14 +110,14 @@ std::string Chip::getSimulationReport() {
 
 double Chip::getRunRounds() {
     double cnt=0;
-    int cores = 0;
+    int active_cores = 0;
     for (const auto& core_ptr:core_array){
+        if (core_ptr->getMaxPC() < 0)
+            continue;
         cnt += core_ptr->getRunRounds();
-        cores ++ ;
+        active_cores ++ ;
     }
-    // average rounds
-//    return cnt/chip_config.core_cnt;
-    return cnt/cores;
+    return active_cores == 0 ? 0 : cnt/active_cores;
 }
 
 void Chip::initializeCores(const nlohmann::json &json_inst) {
