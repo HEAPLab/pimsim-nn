@@ -104,6 +104,17 @@ target_link_libraries(InstructionBinaryTest PRIVATE
 )
 add_test(NAME InstructionBinaryTest COMMAND InstructionBinaryTest)
 
+add_executable(InstructionDirectoryTest
+    test/InstructionDirectoryTest.cpp
+)
+target_include_directories(InstructionDirectoryTest PRIVATE
+    src
+)
+target_link_libraries(InstructionDirectoryTest PRIVATE
+    pimsim-nn
+)
+add_test(NAME InstructionDirectoryTest COMMAND InstructionDirectoryTest)
+
 # compress
 add_executable(zc "")
 target_include_directories(zc PRIVATE packages/header-only/zstr/src)

@@ -11,7 +11,18 @@ namespace {
 
 void printUsage(const char* program) {
     std::cout << "Usage: " << program << " <instruction_path> <config_file>\n"
-              << "       [--gui[=true|false]]\n";
+              << "       [--instruction-mode=auto|single|directory] [--gui[=true|false]]\n";
+}
+
+InstructionInputMode parseInstructionMode(const std::string& value) {
+    if (value == "auto")
+        return InstructionInputMode::Auto;
+    if (value == "single")
+        return InstructionInputMode::SingleFile;
+    if (value == "directory")
+        return InstructionInputMode::PerCoreDirectory;
+    throw std::runtime_error("Unknown instruction mode '" + value
+            + "'; expected auto, single, or directory");
 }
 
 bool parseBool(const std::string& value, const std::string& option) {
@@ -35,6 +46,7 @@ int sc_main(int argc,char* argv[]){
     }
 
     try {
+        InstructionInputMode input_mode = InstructionInputMode::Auto;
         bool gui = false;
         for (int index = 3; index < argc; ++index) {
             const std::string argument(argv[index]);
@@ -42,12 +54,14 @@ int sc_main(int argc,char* argv[]){
                 gui = true;
             } else if (argument.compare(0, 6, "--gui=") == 0) {
                 gui = parseBool(argument.substr(6), "--gui");
+            } else if (argument.compare(0, 19, "--instruction-mode=") == 0) {
+                input_mode = parseInstructionMode(argument.substr(19));
             } else {
                 throw std::runtime_error("Unknown argument: " + argument);
             }
         }
 
-        Simulator simulator(argv[2], argv[1]);
+        Simulator simulator(argv[2], argv[1], input_mode);
         simulator.setRunInGUI(gui);
         simulator.runSimulation();
         return 0;
