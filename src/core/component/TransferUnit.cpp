@@ -194,7 +194,7 @@ void TransferUnit::switchReceiveHandler(std::shared_ptr<NetworkPayload> trans, s
         auto sync_info = send_payload->sync_info;
         event_register[sync_info->event_reg_addr] += 1;
         if (sync_info->event_reg_addr == wait_ev_addr){
-            if (event_register[wait_ev_addr] == wait_ev_value)
+            if (event_register[wait_ev_addr] >= wait_ev_value)
                 sync_wait_trigger.notify();
         }
 
@@ -340,14 +340,14 @@ void TransferUnit::processWaitInst(const TransferInfo &transfer_info) {
     wait_ev_addr = event_register_addr;
     wait_ev_value = wait_value;
 
-    if (event_register[wait_ev_addr] != wait_ev_value){
+    if (event_register[wait_ev_addr] < wait_ev_value){
         // not equal wait until satisfy
         wait(sync_wait_trigger);
     }
     // match condition
 
     // finished
-    event_register[wait_ev_addr] = 0; //reset
+    event_register[wait_ev_addr] -= wait_ev_value;
     wait_ev_addr = -1;
     wait_ev_value = -1;
 }
@@ -465,4 +465,3 @@ std::string TransferUnit::getStatus() {
 
     return s.str();
 }
-

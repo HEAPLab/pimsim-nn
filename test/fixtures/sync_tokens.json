@@ -1,0 +1,1 @@
+{"config":{"core_cnt":2,"array_group_map":{"core0":[1],"core1":[1]}},"core0":[{"core":1,"event_register":0,"op":"sync"},{"core":1,"event_register":0,"op":"sync"}],"core1":[{"imm":0,"len":1,"offset":{"offset_select":0,"offset_value":0},"op":"lldi","rd":0},{"event_register":0,"op":"wait","wait_value":1},{"event_register":0,"op":"wait","wait_value":1}]}

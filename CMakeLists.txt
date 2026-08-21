@@ -145,6 +145,8 @@ add_test(NAME MissingPerCoreFile
     COMMAND ChipTest "${TEST_FIXTURES}/missing" "${TEST_FIXTURES}/latency_config.json")
 add_test(NAME LatencyTimeoutDiagnostics
     COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
+add_test(NAME SyncTokens
+    COMMAND ChipTest "${TEST_FIXTURES}/sync_tokens.json" "${TEST_FIXTURES}/sync_tokens_config.json")
 set_tests_properties(
     DirectoryModeRejectsFile SingleModeRejectsDirectory MalformedArrayGroupMap
     MissingArrayGroupMap MalformedPerCoreFilename MissingPerCoreFile

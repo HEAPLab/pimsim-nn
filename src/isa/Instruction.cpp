@@ -170,10 +170,16 @@ binary_format::InstructionRecord toBinaryRecord(const Instruction& instruction) 
                 record.generic1 = instruction.transfer->offset.offset_select;
                 record.generic2 = instruction.transfer->offset.offset_value;
                 record.generic3 = instruction.transfer->len != 0 ? instruction.transfer->len : instruction.transfer->size;
-                if (instruction.op == +Opcode::send || instruction.op == +Opcode::recv)
+                if (instruction.op == +Opcode::send || instruction.op == +Opcode::recv
+                    || instruction.op == +Opcode::sync)
                     record.r2_or_imm = instruction.transfer->core;
                 else if (instruction.op == +Opcode::lldi)
                     record.r2_or_imm = instruction.transfer->imm;
+                if (instruction.op == +Opcode::sync
+                    || instruction.op == +Opcode::wait)
+                    record.generic1 = instruction.transfer->event_register;
+                if (instruction.op == +Opcode::wait)
+                    record.generic2 = instruction.transfer->wait_value;
             }
             break;
         case InstType::nop:
@@ -227,10 +233,16 @@ Instruction fromBinaryRecord(const binary_format::InstructionRecord& record) {
             } else {
                 instruction.transfer->len = record.generic3;
             }
-            if (instruction.op == +Opcode::send || instruction.op == +Opcode::recv)
+            if (instruction.op == +Opcode::send || instruction.op == +Opcode::recv
+                || instruction.op == +Opcode::sync)
                 instruction.transfer->core = record.r2_or_imm;
             if (instruction.op == +Opcode::lldi)
                 instruction.transfer->imm = record.r2_or_imm;
+            if (instruction.op == +Opcode::sync
+                || instruction.op == +Opcode::wait)
+                instruction.transfer->event_register = record.generic1;
+            if (instruction.op == +Opcode::wait)
+                instruction.transfer->wait_value = record.generic2;
             break;
         case InstType::percesion:
             break;
