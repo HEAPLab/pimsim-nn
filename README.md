@@ -94,6 +94,8 @@ Finally, only two inputs are required: one is the path of program instruction fi
 ChipTest  path_to_program_instructions_file  path_to_archtecture_configuration_file 
 ```
 
+Use `--gui` or `--gui=true` for GUI progress output and `--gui=false` to disable it.
+
 There are some parameters in architecture configuration file to change simulation behavior.
 
 | Parameter            | Description                                                  |
