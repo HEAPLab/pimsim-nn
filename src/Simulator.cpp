@@ -4,7 +4,6 @@
 
 #include "Simulator.h"
 #include "chip/Chip.h"
-#include "utils/Timer.h"
 
 #include <algorithm>
 #include <chrono>
@@ -114,14 +113,12 @@ void Simulator::runSimulation() {
 
     std::cout<<"Start Simulation --- "<<std::endl;
     if (global_config.sim_config.sim_mode == 0) {
-        int levels = is_run_in_gui?100:10;
-        ProgressBar bar(SC_MS,levels,global_config.sim_config.sim_time,[this](int progress){
-            if (is_run_in_gui)
-                std::cout<<fmt::format("<{}>",progress)<<std::endl;
-            else
-                std::cout<<fmt::format("Progress --- <{}0%>",progress)<<std::endl;
-        });
-        sc_start(global_config.sim_config.sim_time,sc_core::SC_MS);
+        const int levels = is_run_in_gui ? 100 : 10;
+        const double chunk_ms = global_config.sim_config.sim_time / levels;
+        for (int level = 1; level <= levels && !sc_end_of_simulation_invoked(); ++level) {
+            sc_start(chunk_ms, sc_core::SC_MS);
+            reportProgress(level * 100 / levels);
+        }
     } else {
         const double poll_ns = std::max(global_config.chip_config.core_config.period, 1.0) * 65536.0;
         const double deadline_ns = sc_time_stamp().to_seconds() * 1e9
@@ -167,7 +164,15 @@ std::string Simulator::getSimulationReport() {
 }
 
 void Simulator::progressBar() {
-    int progress = (sc_time_stamp().to_seconds() / (global_config.sim_config.sim_time/1000)) * 100;
+    const double total_seconds = global_config.sim_config.sim_time / 1000.0;
+    const double progress = total_seconds > 0
+            ? sc_time_stamp().to_seconds() / total_seconds * 100
+            : 0;
+    reportProgress(static_cast<int>(std::max(0.0, std::min(progress, 100.0))));
+}
+
+void Simulator::reportProgress(int progress) {
+    progress = std::max(0, std::min(progress, 100));
     if (is_run_in_gui)
         std::cout<<fmt::format("<{}>",progress)<<std::endl;
     else

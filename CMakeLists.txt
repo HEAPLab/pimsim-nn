@@ -131,6 +131,9 @@ add_test(NAME AutomaticDirectory
 add_test(NAME ExplicitPerCoreDirectory
     COMMAND ChipTest "${TEST_FIXTURES}/directory" "${TEST_FIXTURES}/latency_config.json"
             --instruction-mode=directory)
+add_test(NAME ThroughputProgress
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json")
+set_tests_properties(ThroughputProgress PROPERTIES PASS_REGULAR_EXPRESSION "Progress --- <100%>")
 add_test(NAME ThroughputEmptyCore
     COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/throughput_config.json")
 set_tests_properties(ThroughputEmptyCore PROPERTIES PASS_REGULAR_EXPRESSION
@@ -138,6 +141,9 @@ set_tests_properties(ThroughputEmptyCore PROPERTIES PASS_REGULAR_EXPRESSION
 add_test(NAME ThroughputCompletedRounds
     COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json")
 set_tests_properties(ThroughputCompletedRounds PROPERTIES PASS_REGULAR_EXPRESSION "output count:       1 samples")
+add_test(NAME ThroughputGuiProgress
+    COMMAND ChipTest "${TEST_FIXTURES}/throughput.json" "${TEST_FIXTURES}/throughput_config.json" --gui)
+set_tests_properties(ThroughputGuiProgress PROPERTIES PASS_REGULAR_EXPRESSION "<100>")
 
 add_test(NAME DirectoryModeRejectsFile
     COMMAND ChipTest "${TEST_FIXTURES}/single.json" "${TEST_FIXTURES}/latency_config.json"
@@ -162,6 +168,7 @@ set_tests_properties(
     MissingArrayGroupMap MalformedPerCoreFilename MissingPerCoreFile
     LatencyTimeoutDiagnostics
     PROPERTIES WILL_FAIL TRUE)
+
 # compress
 add_executable(zc "")
 target_include_directories(zc PRIVATE packages/header-only/zstr/src)
