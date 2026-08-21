@@ -3,6 +3,7 @@
 //
 
 #include "Core.h"
+#include "chip/Chip.h"
 #include "fmt/core.h"
 #include <sstream>
 
@@ -123,6 +124,8 @@ int Core::getCoreID() const {
 void Core::setFinish() {
     finish_running =true;
     finish_time_stamp = sc_time_stamp();
+    if (chip_ptr->isFinish())
+        sc_stop();
 }
 
 bool Core::isFinish() const {
