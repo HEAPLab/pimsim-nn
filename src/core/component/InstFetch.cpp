@@ -30,6 +30,15 @@ pc_reg("pc_reg",clk){
 void InstFetch::me_processFetchUpdate() {
     auto cur_pc = pc_out.read();
 
+    if (inst_buffer_size == 0) {
+        if_id_port.write({DecodeInfo(), false});
+        if (sim_config.sim_mode == 1) {
+            std::cout<<"core :"<<core_ptr->getCoreID()<< " reached time:"<<sc_time_stamp()<<std::endl;
+            core_ptr->setFinish();
+        }
+        return;
+    }
+
     if (cur_pc == inst_buffer_size){
         // finish running
         if (sim_config.sim_mode == 1) {
@@ -39,8 +48,8 @@ void InstFetch::me_processFetchUpdate() {
             return;
         }
 
-        // can not reach
-        throw "Inst Fetch Error: Sim mode 1 Can not reach";
+        // A non-empty stream must loop in throughput mode.
+        throw "Inst Fetch Error: throughput stream reached its end";
     }
 
 //    std::cout<<getStatus()<<std::endl;
