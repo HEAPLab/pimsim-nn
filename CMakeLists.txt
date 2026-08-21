@@ -115,6 +115,13 @@ target_link_libraries(InstructionDirectoryTest PRIVATE
 )
 add_test(NAME InstructionDirectoryTest COMMAND InstructionDirectoryTest)
 
+set(TEST_FIXTURES "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures")
+add_test(NAME LatencyScalarCompletion
+    COMMAND ChipTest "${TEST_FIXTURES}/scalar.json" "${TEST_FIXTURES}/scalar_config.json")
+set_tests_properties(LatencyScalarCompletion PROPERTIES
+    TIMEOUT 5
+    PASS_REGULAR_EXPRESSION "latency:")
+
 # compress
 add_executable(zc "")
 target_include_directories(zc PRIVATE packages/header-only/zstr/src)

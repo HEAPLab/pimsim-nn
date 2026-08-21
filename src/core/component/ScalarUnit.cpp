@@ -70,9 +70,8 @@ void ScalarUnit::process() {
 
     reg_file_write_port.write(write_info);
 
-//    if (sim_config.sim_mode == 1)
-//        if (isEndPC(scalar_info.pc))
-//            core_ptr->setFinish();
+    if (sim_config.sim_mode == 1 && scalar_info.pc == core_ptr->getMaxPC())
+        core_ptr->setFinish();
 
     energy_counter.addDynamicEnergyPJ(0,sc_time_stamp(),core_config.period,core_config.scalar_dynamic_power);
 }
@@ -91,5 +90,4 @@ std::string ScalarUnit::getStatus() {
 
     return s.str();
 }
-
 
