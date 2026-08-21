@@ -121,6 +121,9 @@ add_test(NAME LatencyScalarCompletion
 set_tests_properties(LatencyScalarCompletion PROPERTIES
     TIMEOUT 5
     PASS_REGULAR_EXPRESSION "latency:")
+add_test(NAME LatencyTimeoutDiagnostics
+    COMMAND ChipTest "${TEST_FIXTURES}/latency_timeout.json" "${TEST_FIXTURES}/latency_config.json")
+set_tests_properties(LatencyTimeoutDiagnostics PROPERTIES WILL_FAIL TRUE)
 
 # compress
 add_executable(zc "")
