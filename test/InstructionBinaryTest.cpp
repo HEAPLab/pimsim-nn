@@ -8,6 +8,7 @@ int sc_main(int, char*[]) {
 [
   {"imm":64,"op":"sldi","rd":0},
   {"imm":128,"op":"sldi","rd":1},
+  {"op":"vsoftmax","rd":0,"rs1":1,"len":16},
   {"len":16,"offset":{"offset_select":0,"offset_value":0},"op":"lmv","rd":0,"rs1":1},
   {"group":3,"mbiw":8,"op":"mvmul","rd":0,"relu":0,"rs1":1},
   {"len":16,"offset":{"offset_select":0,"offset_value":0},"op":"vvadd","rd":0,"rs1":1,"rs2":2},
@@ -24,6 +25,20 @@ int sc_main(int, char*[]) {
     binary_stream.seekg(0);
 
     const std::vector<Instruction> binary_instructions = readSingleCoreInstFromBinary(binary_stream);
+    std::string with_softmax = binary_stream.str();
+    std::string omitted_record(20, '\0');
+    omitted_record[0] = 21;
+    omitted_record[16] = 16;
+    with_softmax.insert(with_softmax.size(), omitted_record);
+    with_softmax.insert(12 + 2 * 20, omitted_record);
+    with_softmax.insert(12, omitted_record);
+    const uint32_t count = static_cast<uint32_t>(json_instructions.size() + 3);
+    for (unsigned byte = 0; byte < 4; ++byte)
+        with_softmax[8 + byte] = static_cast<char>((count >> (byte * 8)) & 0xff);
+    std::stringstream omitted_stream(with_softmax, std::ios::in | std::ios::binary);
+    const auto omitted_instructions = readSingleCoreInstFromBinary(omitted_stream);
+    const bool empty_softmax = readSingleCoreInstFromJson(
+        nlohmann::json::parse(R"json([{"op":"vsoftmax"}])json")).empty();
     bool malformed_rejected = false;
     try {
         std::stringstream malformed("not-a-pim-binary", std::ios::in | std::ios::binary);
@@ -34,10 +49,12 @@ int sc_main(int, char*[]) {
 
     bool unsupported_rejected = false;
     try {
-        Instruction(nlohmann::json::parse(R"json({"op":"vsoftmax"})json"));
-    } catch (const std::runtime_error& error) {
-        unsupported_rejected = std::string(error.what()) == "pimsim-nn does not support opcode vsoftmax";
+        readSingleCoreInstFromJson(nlohmann::json::parse(R"json([{"op":"unknown"}])json"));
+    } catch (const std::exception&) {
+        unsupported_rejected = true;
     }
 
-    return json_instructions == binary_instructions && malformed_rejected && unsupported_rejected ? 0 : 1;
+    return json_instructions.size() == 8 && json_instructions == binary_instructions
+        && omitted_instructions == json_instructions && empty_softmax
+        && malformed_rejected && unsupported_rejected ? 0 : 1;
 }

@@ -106,6 +106,13 @@ ChipTest instruction_directory config.json --instruction-mode=directory
 
 Use `--gui` or `--gui=true` for GUI progress output and `--gui=false` to disable it.
 
+There is no timing model for `vsoftmax`. It is omitted when JSON or binary instruction streams are loaded.
+It contributes no fetch, issue, execution, memory, or dynamic-energy work.
+Other instructions, synchronization, and transfers retain their normal costs.
+Reported timing and energy therefore exclude Softmax work; this is a modeling
+omission, not hardware support. A warning is emitted once per process when
+`vsoftmax` is encountered. Other unknown opcodes remain errors.
+
 Use `--fast` for a fast steady-state throughput approximation during Raptor
 development. It only affects throughput mode. The simulator compares two
 consecutive, non-overlapping two-round windows and stops when their throughput

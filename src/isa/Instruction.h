@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cstdint>
+#include <iostream>
 #include "nlohmann/json.hpp"
 #include "isa/ISA.h"
 
@@ -228,9 +229,22 @@ struct Instruction {
 
 
 
+inline void warnOmittedSoftmaxTiming() {
+    static const bool warned = [] {
+        std::cerr << "Warning: vsoftmax has no timing model; its instructions are omitted from timing and energy estimates.\n";
+        return true;
+    }();
+    (void)warned;
+}
+
 inline std::vector<Instruction> readSingleCoreInstFromJson(const nlohmann::json& json_inst_array){
     std::vector<Instruction> tmp;
     for (auto& cur_inst:json_inst_array){
+        // There is no vsoftmax timing model. Omit it before fetch.
+        if (cur_inst.at("op").get<std::string>() == "vsoftmax") {
+            warnOmittedSoftmaxTiming();
+            continue;
+        }
         tmp.emplace_back(cur_inst);
     }
     return tmp;

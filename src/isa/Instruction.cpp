@@ -282,6 +282,11 @@ std::vector<Instruction> readSingleCoreInstFromBinary(std::istream& binary_strea
         record.generic1 = readScalarLE<int32_t>(binary_stream);
         record.generic2 = readScalarLE<int32_t>(binary_stream);
         record.generic3 = readScalarLE<int32_t>(binary_stream);
+        // Binary opcode 21 is vsoftmax, omitted before fetch just as in JSON input.
+        if (record.opcode == 21) {
+            warnOmittedSoftmaxTiming();
+            continue;
+        }
         instructions.push_back(fromBinaryRecord(record));
     }
     return instructions;
